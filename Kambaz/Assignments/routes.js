@@ -1,8 +1,8 @@
 import AssignmentsDao from "./dao.js";
 import { v4 as uuidv4 } from "uuid";
 
-export default function AssignmentsRoutes(app, db) {
-  const dao = AssignmentsDao(db);
+export default function AssignmentsRoutes(app) {
+  const dao = AssignmentsDao();
 
   app.get("/api/courses/:cid/assignments", async (req, res) => {
     const assignments = await dao.findAssignmentsForCourse(req.params.cid);
