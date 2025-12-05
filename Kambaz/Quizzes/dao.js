@@ -1,9 +1,6 @@
 import { v4 as uuidv4 } from "uuid";
 import model from "./model.js";
 
-/**
- * QuizzesDao - data access functions for quizzes and quiz questions
- */
 export default function QuizzesDao() {
   async function findQuizzesForCourse(courseId) {
     // return quizzes for a course, sorted by availableDate (oldest first),
@@ -66,7 +63,7 @@ export default function QuizzesDao() {
     return model.updateOne({ _id: quizId }, { $set: { published } });
   }
 
-  // Question-level helpers ------------------------------------------------
+  // question level
   async function addQuestion(quizId, question) {
     const q = { ...question, _id: uuidv4() };
     // ensure numeric points

@@ -1,11 +1,8 @@
-// quizzes/routes.js
 import QuizzesDao from "./dao.js";
-import { v4 as uuidv4 } from "uuid";
 
 export default function QuizzesRoutes(app, db) {
   const dao = QuizzesDao(db);
 
-  // List quizzes for a course (sorted by availableDate by dao)
   app.get("/api/courses/:cid/quizzes", async (req, res) => {
     try {
       const quizzes = await dao.findQuizzesForCourse(req.params.cid);
@@ -16,7 +13,6 @@ export default function QuizzesRoutes(app, db) {
     }
   });
 
-  // Create a new quiz with defaults and return it
   app.post("/api/courses/:cid/quizzes", async (req, res) => {
     try {
       const quizBody = req.body || {};
@@ -28,7 +24,6 @@ export default function QuizzesRoutes(app, db) {
     }
   });
 
-  // Get a single quiz
   app.get("/api/quizzes/:qid", async (req, res) => {
     try {
       const quiz = await dao.findQuizById(req.params.qid);
@@ -43,7 +38,6 @@ export default function QuizzesRoutes(app, db) {
     }
   });
 
-  // Update whole quiz (metadata / questions)
   app.put("/api/quizzes/:qid", async (req, res) => {
     try {
       const status = await dao.updateQuiz(req.params.qid, req.body);
@@ -54,7 +48,6 @@ export default function QuizzesRoutes(app, db) {
     }
   });
 
-  // Delete quiz
   app.delete("/api/quizzes/:qid", async (req, res) => {
     try {
       const status = await dao.deleteQuiz(req.params.qid);
@@ -65,7 +58,6 @@ export default function QuizzesRoutes(app, db) {
     }
   });
 
-  // Publish/unpublish toggle endpoint - payload { published: true|false } (or PUT to toggle)
   app.put("/api/quizzes/:qid/publish", async (req, res) => {
     try {
       const { published } = req.body;
@@ -77,8 +69,6 @@ export default function QuizzesRoutes(app, db) {
     }
   });
 
-  // Question-level endpoints
-  // Add a new question to quiz
   app.post("/api/quizzes/:qid/questions", async (req, res) => {
     try {
       const question = req.body || {};
@@ -90,7 +80,6 @@ export default function QuizzesRoutes(app, db) {
     }
   });
 
-  // Update a question
   app.put("/api/quizzes/:qid/questions/:qqid", async (req, res) => {
     try {
       const updated = await dao.updateQuestion(
@@ -105,7 +94,6 @@ export default function QuizzesRoutes(app, db) {
     }
   });
 
-  // Delete a question
   app.delete("/api/quizzes/:qid/questions/:qqid", async (req, res) => {
     try {
       const status = await dao.deleteQuestion(req.params.qid, req.params.qqid);
