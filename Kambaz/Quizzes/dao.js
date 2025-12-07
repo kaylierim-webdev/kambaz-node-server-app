@@ -1,5 +1,6 @@
 import { v4 as uuidv4 } from "uuid";
 import model from "./model.js";
+import attemptModel from "./attemptModel.js";
 
 export default function QuizzesDao() {
   async function findQuizzesForCourse(courseId) {
@@ -115,6 +116,64 @@ export default function QuizzesDao() {
     return { deleted: true };
   }
 
+  function submitQuizAttempt(quizId, userId, answers) {
+    return model.findById(quizId).then((quiz) => {
+      if (!quiz) throw new Error("Quiz not found");
+
+      return attemptModel.countDocuments({ quiz: quizId, user: userId }).then((attemptCount) => {
+        if (quiz.multipleAttempts && attemptCount >= quiz.howManyAttempts) {
+          throw new Error("Maximum attempts reached");
+        }
+
+        let score = 0;
+        const gradedAnswers = answers.map((answer) => {
+          const question = quiz.questions.find((q) => q._id === answer.questionId);
+          if (!question) return { ...answer, isCorrect: false };
+
+          let isCorrect = false;
+
+          if (question.type === "multiple_choice") {
+            const correctChoice = question.choices.find((c) => c.correct);
+            isCorrect = answer.answer === correctChoice?._id;
+          } else if (question.type === "true_false") {
+            isCorrect = answer.answer === question.answerIsTrue;
+          } else if (question.type === "fill_blank") {
+            isCorrect = question.answers.some(
+              (a) => a.toLowerCase().trim() === String(answer.answer).toLowerCase().trim()
+            );
+          }
+
+          if (isCorrect) score += question.points || 0;
+          return { ...answer, isCorrect };
+        });
+
+        const attempt = {
+          _id: uuidv4(),
+          quiz: quizId,
+          user: userId,
+          attemptNumber: attemptCount + 1,
+          answers: gradedAnswers,
+          score,
+          submittedAt: new Date(),
+        };
+
+        return attemptModel.create(attempt);
+      });
+    });
+  }
+
+  function getQuizAttempts(quizId, userId) {
+    return attemptModel.find({ quiz: quizId, user: userId }).sort({ submittedAt: -1 });
+  }
+
+  function getAttemptById(attemptId) {
+    return attemptModel.findById(attemptId);
+  }
+
+  function getLatestAttempt(quizId, userId) {
+    return attemptModel.findOne({ quiz: quizId, user: userId }).sort({ submittedAt: -1 });
+  }
+
   return {
     findQuizzesForCourse,
     findQuizById,
@@ -125,5 +184,9 @@ export default function QuizzesDao() {
     addQuestion,
     updateQuestion,
     deleteQuestion,
+    submitQuizAttempt,
+    getQuizAttempts,      
+    getAttemptById,
+    getLatestAttempt,
   };
 }

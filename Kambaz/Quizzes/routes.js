@@ -103,4 +103,46 @@ export default function QuizzesRoutes(app, db) {
       res.status(500).json({ error: err.message });
     }
   });
+  
+    app.post("/api/quizzes/:quizId/attempts", async (req, res) => {
+    const { quizId } = req.params;
+    const { userId, answers } = req.body;
+    try {
+      const attempt = await dao.submitQuizAttempt(quizId, userId, answers);
+      res.json(attempt);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.get("/api/quizzes/:quizId/attempts/user/:userId", async (req, res) => {
+    const { quizId, userId } = req.params;
+    try {
+      const attempts = await dao.getQuizAttempts(quizId, userId);
+      res.json(attempts);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.get("/api/quiz-attempts/:attemptId", async (req, res) => {
+    const { attemptId } = req.params;
+    try {
+      const attempt = await dao.getAttemptById(attemptId);
+      res.json(attempt);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.get("/api/quizzes/:quizId/attempts/user/:userId/latest", async (req, res) => {
+    const { quizId, userId } = req.params;
+    try {
+      const attempt = await dao.getLatestAttempt(quizId, userId);
+      res.json(attempt);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  });
 }
+
