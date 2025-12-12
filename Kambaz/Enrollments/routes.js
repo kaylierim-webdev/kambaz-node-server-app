@@ -5,7 +5,8 @@ export default function EnrollmentsRoutes(app, db) {
 
   app.post("/api/enrollments", (req, res) => {
     const { userId, courseId } = req.body;
-    if (!userId || !courseId) return res.status(400).send({ error: "userId and courseId required" });
+    if (!userId || !courseId)
+      return res.status(400).send({ error: "userId and courseId required" });
     const result = dao.createEnrollment({ userId, courseId });
     res.json(result);
   });
@@ -16,9 +17,9 @@ export default function EnrollmentsRoutes(app, db) {
     res.json(result);
   });
 
-  app.get("/api/users/:userId/enrollments", (req, res) => {
+  app.get("/api/users/:userId/enrollments", async (req, res) => {
     const { userId } = req.params;
-    const enrollments = dao.findEnrollmentsForUser(userId);
+    const enrollments = await dao.findCoursesForUser(userId);
     res.json(enrollments);
   });
 
